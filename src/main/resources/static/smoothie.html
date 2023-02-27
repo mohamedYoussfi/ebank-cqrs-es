@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.34.0/smoothie.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script>
+        function watch(){
+            accountId=document.getElementById('accountId').value;
+            courbe = new TimeSeries();
+            var smoothieChart = new SmoothieChart({tooltip: true});
+            smoothieChart.streamTo(document.getElementById("chart2"), 500);
+            smoothieChart.addTimeSeries(courbe, {
+                strokeStyle: 'rgba(0, 255, 0, 1)',
+                fillStyle: 'rgba(0, 255, 255, 0.2)',
+                lineWidth: 2
+            });
+            var stockEventSource = new EventSource("query/account/"+accountId+"/watch");
+            stockEventSource.addEventListener("message", function (event) {
+                var val = JSON.parse(event.data);
+                courbe.append(new Date().getTime(), val.currentBalance);
+                list=document.getElementById('transactionsList')
+                entry = document.createElement('li');
+                entry.setAttribute('class','list-group-item')
+                entry.appendChild(document.createTextNode(val.type+"  |  "+val.transactionAmount+"  |  "+val.instant));
+                list.appendChild(entry);
+            }, false);
+
+        }
+    </script>
+</head>
+<body>
+<div class="p-2">
+    <div class="row">
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Account Id" id="accountId">
+        </div>
+        <div class="col">
+            <button onclick="watch()" class="btn btn-info">Watch</button>
+        </div>
+    </div>
+</div>
+<div>
+    <canvas id="chart2" width="600" height="400"></canvas>
+    <ul class="list-group" id="transactionsList">
+
+    </ul>
+</div>
+</body>
+</html>
