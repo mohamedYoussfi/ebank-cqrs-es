@@ -1,5 +1,6 @@
 package org.sid.accountserviceaxon.query.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +23,6 @@ public class Account {
     private AccountStatus status;
     private String currency;
     @OneToMany(mappedBy = "account")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<AccountTransaction> transactions;
 }

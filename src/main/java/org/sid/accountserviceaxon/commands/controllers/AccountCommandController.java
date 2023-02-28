@@ -53,6 +53,7 @@ public class AccountCommandController {
                 request.getAmount()
         ));
     }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> exeptionHandler(Exception exception){
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

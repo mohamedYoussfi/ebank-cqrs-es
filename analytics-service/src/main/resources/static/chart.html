@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.34.0/smoothie.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script>
+        function watch(){
+            accountId=document.getElementById('accountId').value;
+            const ctx = document.getElementById('myChart');
+            let chartData={
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Account Balance',
+                        data: [],
+                        borderWidth: 1
+                    },{
+                        label: 'Total Debit',
+                        data: [],
+                        borderWidth: 1
+                    },{
+                        label: 'TotalCredit',
+                        data: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+            let chart=new Chart(ctx,chartData );
+            let stockEventSource = new EventSource("query/accountAnalytics/"+accountId+"/watch");
+            stockEventSource.addEventListener("message", function (event) {
+                var val = JSON.parse(event.data);
+                chartData.data.labels.push(new Date().getTime())
+                chartData.data.datasets[0].data.push(val.balance);
+                chartData.data.datasets[1].data.push(val.totalDebit);
+                chartData.data.datasets[2].data.push(val.totalCredit);
+                chart.update();
+            }, false);
+        }
+    </script>
+</head>
+<body>
+<div class="p-2">
+    <div class="row">
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Account Id" id="accountId">
+        </div>
+        <div class="col">
+            <button onclick="watch()" class="btn btn-info">Watch</button>
+        </div>
+    </div>
+</div>
+
+<canvas id="myChart"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+</script>
+</body>
+</html>

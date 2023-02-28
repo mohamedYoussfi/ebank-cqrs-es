@@ -65,7 +65,7 @@ public class AccountEventHandlerService {
         AccountWatchEvent accountWatchEvent=new AccountWatchEvent(
             accountTransaction.getTimestamp(),account.getId(),account.getBalance(),accountTransaction.getType(),accountTransaction.getAmount()
         );
-        queryUpdateEmitter.emit(GetAccountBalanceStream.class,(query)->(query.accountId().equals(account.getId())),accountWatchEvent);
+        queryUpdateEmitter.emit(GetAccountBalanceStream.class,(query)->(query.getAccountId().equals(account.getId())),accountWatchEvent);
     }
     @EventHandler
     public void on(AccountDebitedEvent event, EventMessage<AccountCreatedEvent> eventMessage){
@@ -84,7 +84,7 @@ public class AccountEventHandlerService {
         AccountWatchEvent accountWatchEvent=new AccountWatchEvent(
                 accountTransaction.getTimestamp(),account.getId(),account.getBalance(),accountTransaction.getType(),accountTransaction.getAmount()
         );
-        queryUpdateEmitter.emit(GetAccountBalanceStream.class,(query)->(query.accountId().equals(account.getId())),accountWatchEvent);
+        queryUpdateEmitter.emit(GetAccountBalanceStream.class,(query)->(query.getAccountId().equals(account.getId())),accountWatchEvent);
     }
     @QueryHandler
     public List<Account> on(GetAllAccounts query){
@@ -92,16 +92,17 @@ public class AccountEventHandlerService {
     }
     @QueryHandler
     public Account on(GetAccountById query){
-        return accountRepository.findById(query.accountId()).get();
+        return accountRepository.findById(query.getAccountId()).get();
     }
     @QueryHandler
     public AccountWatchEvent on(GetAccountBalanceStream query){
-        Account account = accountRepository.findById(query.accountId()).get();
-        AccountTransaction accountTransaction=transactionRepository.findTop1ByAccountIdOrderByTimestampDesc(query.accountId());
-        AccountWatchEvent accountWatchEvent=new AccountWatchEvent(
+        Account account = accountRepository.findById(query.getAccountId()).get();
+        AccountTransaction accountTransaction=transactionRepository.findTop1ByAccountIdOrderByTimestampDesc(query.getAccountId());
+        if(accountTransaction!=null)
+        return new AccountWatchEvent(
                 accountTransaction.getTimestamp(),
           account.getId(),account.getBalance(),accountTransaction.getType(),accountTransaction.getAmount()
         );
-        return accountWatchEvent;
+        return null;
     }
 }
